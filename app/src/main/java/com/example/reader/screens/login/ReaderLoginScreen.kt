@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -35,14 +36,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.reader.R
 import com.example.reader.components.EmailInput
 import com.example.reader.components.PasswordInput
 import com.example.reader.components.ReaderLogo
+import com.example.reader.navigation.ReaderScreens
 
 @Composable
-fun ReaderLoginScreen(navController: NavHostController) {
+fun ReaderLoginScreen(
+    navController: NavHostController,
+    viewModel: LoginScreenViewModel = viewModel()
+) {
     var loading by rememberSaveable{
         mutableStateOf(false)
     }
@@ -52,6 +58,7 @@ fun ReaderLoginScreen(navController: NavHostController) {
     }
     Surface(
         modifier = Modifier
+            .statusBarsPadding()
             .fillMaxSize()
     ) {
         Column(
@@ -67,7 +74,10 @@ fun ReaderLoginScreen(navController: NavHostController) {
                     Log.d("Formmm", "ReaderLoginScreen: $email $pwd")
                     loading = !loading
 
-
+                    //Login
+                    viewModel.signInWithEmailAndPassword(email,pwd){
+                        navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                    }
 
                 }
             }
@@ -79,7 +89,10 @@ fun ReaderLoginScreen(navController: NavHostController) {
                     Log.d("Formmm", "ReaderLoginScreen: $email $pwd")
                     loading = !loading
 
-
+                    //Create Account
+                    viewModel.createUserWithEmailAndPassword(email,pwd){
+                        navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                    }
 
                 }
             }
