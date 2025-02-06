@@ -90,13 +90,13 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
 
     // Retrofit
-    implementation ("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
 
     // OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // JSON Converter
-    implementation ("com.google.code.gson:gson:2.12.1")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }
 
 kapt {

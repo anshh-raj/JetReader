@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -212,8 +213,10 @@ fun TitleSection(
 @Composable
 fun ReaderAppBar(
     title: String,
+    icon: ImageVector? = null,
     showProfile: Boolean = true,
-    navController: NavController
+    navController: NavController,
+    onBackArrowClicked: () -> Unit = {}
 ){
     TopAppBar(
         title = {
@@ -236,6 +239,16 @@ fun ReaderAppBar(
                         )
                     }
                 }
+                if(icon != null){
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "arrow back",
+                        tint = Color.Red.copy(alpha = 0.7f),
+                        modifier = Modifier.clickable {
+                            onBackArrowClicked()
+                        }
+                    )
+                }
                 Spacer(modifier = Modifier.size(15.dp))
                 Text(
                     title,
@@ -248,17 +261,19 @@ fun ReaderAppBar(
             }
         },
         actions = {
-            IconButton(
-                onClick = {
-                    FirebaseAuth.getInstance().signOut().run {
-                        navController.navigate(ReaderScreens.LoginScreen.name)
+            if(showProfile){
+                IconButton(
+                    onClick = {
+                        FirebaseAuth.getInstance().signOut().run {
+                            navController.navigate(ReaderScreens.LoginScreen.name)
+                        }
                     }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = "Log Out",
+                    )
                 }
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                    contentDescription = "Log Out",
-                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
