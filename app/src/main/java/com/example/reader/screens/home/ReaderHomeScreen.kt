@@ -1,5 +1,8 @@
 package com.example.reader.screens.home
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.reader.components.FABContent
 import com.example.reader.components.ListCard
@@ -37,7 +42,11 @@ import com.example.reader.navigation.ReaderScreens
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun Home(navController: NavController) {
+fun Home(navController: NavController, viewModel: HomeScreenViewModel = hiltViewModel()) {
+    val activity = LocalActivity.current
+    BackHandler {
+        activity?.finish()
+    }
     Scaffold(
         topBar = {
             ReaderAppBar(
@@ -57,116 +66,136 @@ fun Home(navController: NavController) {
                 .fillMaxSize()
         ) {
 
-            HomeContent(navController)
+            HomeContent(navController, viewModel)
 
         }
     }
 }
 
 @Composable
-fun HomeContent(navController: NavController) {
-    val listOfBooks = listOf(
-        MBook(
-            id="bshsbd",
-            title = "hello again",
-            authors = "All of us",
-            notes = null
-        ),
-        MBook(
-            id="bshsbd",
-            title = "hello again",
-            authors = "All of us",
-            notes = null
-        ),
-        MBook(
-            id="bshsbd",
-            title = "hello again",
-            authors = "All of us",
-            notes = null
-        ),
-        MBook(
-            id="bshsbd",
-            title = "hello again",
-            authors = "All of us",
-            notes = null
-        ),
-        MBook(
-            id="bshsbd",
-            title = "hello again",
-            authors = "All of us",
-            notes = null
-        )
+fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
+//    val listOfBooks = listOf(
+//        MBook(
+//            id="bshsbd",
+//            title = "hello again",
+//            authors = "All of us",
+//            notes = null
+//        ),
+//        MBook(
+//            id="bshsbd",
+//            title = "hello again",
+//            authors = "All of us",
+//            notes = null
+//        ),
+//        MBook(
+//            id="bshsbd",
+//            title = "hello again",
+//            authors = "All of us",
+//            notes = null
+//        ),
+//        MBook(
+//            id="bshsbd",
+//            title = "hello again",
+//            authors = "All of us",
+//            notes = null
+//        ),
+//        MBook(
+//            id="bshsbd",
+//            title = "hello again",
+//            authors = "All of us",
+//            notes = null
+//        )
+//
+//    )
 
-    )
+    if(viewModel.data.value.loading == false){
+        val currentUser = FirebaseAuth.getInstance().currentUser
 
-    val currentUserName = if(!FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()){
-        FirebaseAuth.getInstance().currentUser?.email?.split("@")?.get(0)
-    }
-    else "N/A"
-    Column(
-        modifier = Modifier.padding(2.dp),
-        verticalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Row(
-            modifier = Modifier
-                .align(alignment = Alignment.Start),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TitleSection(
-                label = "Your reading \n activity right now.."
-            )
-
-            Spacer(modifier = Modifier.fillMaxWidth(0.7f))
-
-            Column(
-                modifier = Modifier.padding(end = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                Icon(
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = "Profile",
-                    modifier = Modifier
-                        .clickable {
-                            navController.navigate(ReaderScreens.ReaderStatsScreen.name)
-                        }
-                        .size(45.dp),
-                    tint = Color.Gray
-                )
-                Text(
-                    currentUserName.toString(),
-                    modifier = Modifier
-                        .padding(2.dp),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.Red,
-                    fontSize = 15.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Clip
-                )
-                HorizontalDivider()
-            }
+        val listOfBooks = viewModel.data.value.data!!.toList().filter { mBook ->
+            mBook.userId == currentUser?.uid.toString()
         }
 
-        ReadingRightNowArea(
-            books = listOfBooks,
-            navController = navController
-        )
+        Log.d("Books", "HomeContent: $listOfBooks")
 
-        TitleSection(
-            label = "Reading List"
-        )
+        val currentUserName = if(!FirebaseAuth.getInstance().currentUser?.email.isNullOrEmpty()){
+            FirebaseAuth.getInstance().currentUser?.email?.split("@")?.get(0)
+        }
+        else "N/A"
+        Column(
+            modifier = Modifier.padding(2.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Row(
+                modifier = Modifier
+                    .align(alignment = Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TitleSection(
+                    label = "Your reading \n activity right now.."
+                )
 
-        BookListArea(
-            listOfBooks = listOfBooks,
-            navController = navController
-        )
+                Spacer(modifier = Modifier.fillMaxWidth(0.7f))
 
+                Column(
+                    modifier = Modifier.padding(end = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = "Profile",
+                        modifier = Modifier
+                            .clickable {
+                                navController.navigate(ReaderScreens.ReaderStatsScreen.name)
+                            }
+                            .size(45.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        currentUserName.toString(),
+                        modifier = Modifier
+                            .padding(2.dp),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.Red,
+                        fontSize = 15.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip
+                    )
+                    HorizontalDivider()
+                }
+            }
+
+            ReadingRightNowArea(
+                books = listOfBooks,
+                navController = navController
+            )
+
+            TitleSection(
+                label = "Reading List"
+            )
+
+            BookListArea(
+                listOfBooks = listOfBooks,
+                navController = navController
+            )
+
+        }
     }
+    else{
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+
 }
 
 @Composable
 fun BookListArea(listOfBooks: List<MBook>, navController: NavController) {
     HorizontalScrollableComponent(listOfBooks){
-
+        navController.navigate(ReaderScreens.UpdateScreen.name + "/$it")
     }
 }
 
@@ -188,7 +217,6 @@ fun HorizontalScrollableComponent(
                 book = book
             ){
                 onCardPressed(it)
-
             }
         }
 

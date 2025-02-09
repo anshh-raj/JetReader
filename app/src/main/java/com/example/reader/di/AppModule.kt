@@ -3,7 +3,9 @@ package com.example.reader.di
 import com.example.reader.network.BooksAPI
 import com.example.reader.repository.BookRepository
 import com.example.reader.repository.BookRepositoryNew
+import com.example.reader.repository.FireRepository
 import com.example.reader.utils.Constants
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,6 +17,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Singleton
+    @Provides
+    fun provideFireRepository() = FireRepository(queryBook = FirebaseFirestore.getInstance().collection("books"))
 
     @Singleton
     @Provides

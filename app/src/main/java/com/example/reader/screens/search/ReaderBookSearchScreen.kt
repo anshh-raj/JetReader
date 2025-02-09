@@ -1,6 +1,7 @@
 package com.example.reader.screens.search
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,6 +52,9 @@ fun SearchScreen(
     navController: NavHostController,
     viewModelNew: BookSearchViewModelNew = hiltViewModel()
 ) {
+    BackHandler {
+        navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+    }
     Scaffold(
         topBar = {
             ReaderAppBar(
@@ -59,7 +63,7 @@ fun SearchScreen(
                 navController = navController,
                 showProfile = false
             ){
-                navController.popBackStack()
+                navController.navigate(ReaderScreens.ReaderHomeScreen.name)
             }
         }
     ) {

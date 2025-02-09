@@ -42,6 +42,7 @@ import com.example.reader.model.Item
 import com.example.reader.model.MBook
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 
 @Composable
 fun BookDetailsScreen(
@@ -176,24 +177,64 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavHostController) 
             modifier = Modifier.padding(top = 6.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
+            var title = ""
+            try {
+                title = bookData.title
+            }catch (_:Exception){}
+
+            var authors = ""
+            try {
+                authors = bookData.authors.toString()
+            }catch (_:Exception){}
+
+            var description = ""
+            try {
+                description = bookData.description
+            }catch (_:Exception){}
+
+            var categories = ""
+            try {
+                categories = bookData.categories.toString()
+            }catch (_:Exception){}
+
+            var photoUrl = ""
+            try {
+                photoUrl = bookData.imageLinks.smallThumbnail
+            }catch (_:Exception){}
+
+            var publishedDate = ""
+            try {
+                publishedDate = bookData.publishedDate
+            }catch (_:Exception){}
+
+            var pageCount = ""
+            try {
+                pageCount = bookData.pageCount.toString()
+            }catch (_:Exception){}
+
             RoundedButton(
                 label = "Save"
             ){
                 // save this book to firestore database
                 val book = MBook(
-                    title = bookData.title,
-                    authors = bookData.authors.toString(),
-                    description = bookData.description,
-                    categories = bookData.categories.toString(),
+                    title = title,
+                    authors = authors,
+                    description = description,
+                    categories = categories,
                     notes = "",
-                    photoUrl = bookData.imageLinks.smallThumbnail,
-                    publishedDate = bookData.publishedDate,
-                    pageCount = bookData.pageCount.toString(),
+                    photoUrl = photoUrl,
+                    publishedDate = publishedDate,
+                    pageCount = pageCount,
                     rating = 0.0,
                     googleBookId = googleBookId,
-                    userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+                    userId = FirebaseAuth.getInstance().currentUser?.uid.toString(),
+
                 )
-                saveToFirebase(book, navController)
+                try{
+                    saveToFirebase(book, navController)
+                }catch (e:Exception){
+                    Log.d("FError", "ShowBookDetails: ${e.message}")
+                }
             }
             Spacer(modifier = Modifier.width(25.dp))
             RoundedButton(
@@ -220,7 +261,7 @@ fun saveToFirebase(book: MBook, navController: NavHostController) {
                             navController.popBackStack()
                     }
                     .addOnFailureListener {
-                        Log.d("Error", "saveToFirebase: Error updating doc", it)
+                        Log.d("Errorr", "saveToFirebase: Error updating doc", it)
                     }
             }
     }else{}

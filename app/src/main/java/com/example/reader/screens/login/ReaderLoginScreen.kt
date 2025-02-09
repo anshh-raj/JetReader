@@ -1,6 +1,8 @@
 package com.example.reader.screens.login
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,6 +51,10 @@ fun ReaderLoginScreen(
     navController: NavHostController,
     viewModel: LoginScreenViewModel = viewModel()
 ) {
+    val activity = LocalActivity.current
+    BackHandler {
+        activity?.finish()
+    }
     var loading by rememberSaveable{
         mutableStateOf(false)
     }

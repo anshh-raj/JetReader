@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.reader.screens.details.BookDetailsScreen
 import com.example.reader.screens.home.Home
+import com.example.reader.screens.home.HomeScreenViewModel
 import com.example.reader.screens.login.ReaderLoginScreen
 import com.example.reader.screens.search.BookSearchViewModel
 import com.example.reader.screens.search.BookSearchViewModelNew
@@ -25,7 +26,8 @@ fun ReaderNavigation() {
             ReaderSplashScreen(navController = navController)
         }
         composable(ReaderScreens.ReaderHomeScreen.name){
-            Home(navController = navController)
+            val viewModel = hiltViewModel<HomeScreenViewModel>()
+            Home(navController = navController, viewModel)
         }
 
         val detailName = ReaderScreens.DetailScreen.name
@@ -42,8 +44,16 @@ fun ReaderNavigation() {
             val viewModelNew = hiltViewModel<BookSearchViewModelNew>()
             SearchScreen(navController = navController, viewModelNew)
         }
-        composable(ReaderScreens.UpdateScreen.name){
-            BookUpdateScreen(navController = navController)
+
+        val updateName = ReaderScreens.UpdateScreen.name
+        composable("$updateName/{bookItemId}",
+            arguments = listOf(navArgument("bookItemId"){
+                type = NavType.StringType
+            })
+        ){ backStackEntry ->
+            backStackEntry.arguments?.getString("bookItemId").let {
+                BookUpdateScreen(navController = navController, bookItemId = it.toString())
+            }
         }
         composable(ReaderScreens.ReaderStatsScreen.name){
             ReaderStatsScreen(navController = navController)
