@@ -49,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -356,6 +355,10 @@ fun ListCard(
 
     val spacing = 10.dp
 
+    val isStartedReading = remember {
+        mutableStateOf(false)
+    }
+
     Card(
         shape = RoundedCornerShape(29.dp),
         colors = CardDefaults.cardColors(
@@ -385,7 +388,7 @@ fun ListCard(
                 var url = ""
                 try {
                     url = book.photoUrl.toString()
-                }catch (e:Exception){}
+                }catch (_:Exception){}
                 AsyncImage(
                     model = url,
                     contentDescription = "Book Image",
@@ -412,7 +415,7 @@ fun ListCard(
                         modifier = Modifier.padding(bottom = 1.dp)
                     )
 
-                    BookRating(score = 3.5)
+                    BookRating(score = book.rating!!)
 
                 }
             }
@@ -438,10 +441,13 @@ fun ListCard(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.Bottom
             ) {
+                isStartedReading.value = book.startedReading != null
                 RoundedButton(
-                    label = "Reading",
+                    label = if(isStartedReading.value == false) "Not Started" else "Reading",
                     radius = 70
-                )
+                ){
+
+                }
             }
         }
     }
@@ -473,7 +479,7 @@ fun RoundedButton(
                 label,
                 style = TextStyle(
                     color = Color.White,
-                    fontSize = 15.sp
+                    fontSize = 14.sp
                 )
             )
         }

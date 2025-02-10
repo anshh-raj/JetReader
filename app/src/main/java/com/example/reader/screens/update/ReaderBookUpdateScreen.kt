@@ -1,6 +1,8 @@
 package com.example.reader.screens.update
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,13 +20,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,20 +39,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
+import com.example.reader.R
 import com.example.reader.components.InputField
 import com.example.reader.components.RatingBar
 import com.example.reader.components.ReaderAppBar
+import com.example.reader.components.RoundedButton
 import com.example.reader.data.DataOrException
 import com.example.reader.model.MBook
 import com.example.reader.navigation.ReaderScreens
 import com.example.reader.screens.home.HomeScreenViewModel
+import com.example.reader.utils.formatDate
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun BookUpdateScreen(
@@ -129,7 +141,7 @@ fun BookUpdateScreen(
 @Composable
 fun ShowSimpleForm(book: MBook, navController: NavHostController) {
     val noteText = remember {
-        mutableStateOf("")
+        mutableStateOf(book.notes.toString())
     }
 
     val isStartedReading = remember {
@@ -141,14 +153,17 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
     }
 
     val ratingVal = remember {
-        mutableIntStateOf(0)
+        mutableIntStateOf(book.rating!!.toInt())
     }
+
+    val context = LocalContext.current
 
     SimpleForm(
         defaultValue = if (book.notes.toString().isNotEmpty()) book.notes.toString()
          else ""
     ) { note ->
         noteText.value = note
+//        Log.d("Note", "ShowSimpleForm: ${noteText.value}")
     }
 
     Row (
@@ -174,7 +189,7 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
                     )
                 }
             }else{
-                Text("Started on: ${book.startedReading}")
+                Text("Started on: ${formatDate(book.startedReading!!)}")
             }
         }
 
@@ -197,7 +212,7 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
                     )
                 }
             }else{
-                Text("Finished on: ${book.finishedReading}")
+                Text("Finished on: ${formatDate(book.finishedReading!!)}")
             }
 
         }
@@ -215,15 +230,145 @@ fun ShowSimpleForm(book: MBook, navController: NavHostController) {
         }
     }
 
-//    Spacer(modifier = Modifier.padding(bottom = 15.dp))
-//
-//    Row {  }
+    Spacer(modifier = Modifier.padding(bottom = 15.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        val changedNotes = noteText.value != book.notes
+        val changedRating = ratingVal.intValue != book.rating!!.toInt()
+        val isFinishedTimeStamp = if(isFinishedReading.value == false) Timestamp.now() else book.finishedReading
+        val isStartedTimeStamp = if(isStartedReading.value == false) Timestamp.now() else book.startedReading
+
+        val bookUpdate = changedNotes || changedRating || !isFinishedReading.value || !isStartedReading.value
+
+        val bookToUpdate = hashMapOf(
+            "finished_reading_at" to isFinishedTimeStamp,
+            "started_reading_at" to isStartedTimeStamp,
+            "rating" to ratingVal.intValue,
+            "notes" to noteText.value
+        ).toMap()
+
+        RoundedButton(
+            label = "Update"
+        ){
+            if(bookUpdate){
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id.toString())
+                    .update(bookToUpdate)
+                    .addOnCompleteListener {task ->
+                        if(task.isSuccessful){
+                            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                            showToast(context, "Book Updated Successfully!")
+                        }
+                    }
+                    .addOnFailureListener {
+                        Log.w("Errorr", "ShowSimpleForm: Error Updating Document", it)
+                    }
+            }
+        }
+
+        val openDialog = remember {
+            mutableStateOf(false)
+        }
+        if(openDialog.value){
+            ShowAlertDialog(
+                message = stringResource(id = R.string.sure) + "\n" + stringResource(id = R.string.action),
+                openDialog
+            ){
+                FirebaseFirestore.getInstance()
+                    .collection("books")
+                    .document(book.id!!)
+                    .delete()
+                    .addOnCompleteListener { task ->
+                        if(task.isSuccessful){
+                            openDialog.value = false
+                            navController.navigate(ReaderScreens.ReaderHomeScreen.name)
+                            showToast(context, "Book Deleted Successfully!")
+                        }
+                    }
+                    .addOnFailureListener {
+                        Log.w("Errorr", "ShowSimpleForm: Error Deleting Book", it)
+                    }
+            }
+        }
+        RoundedButton(
+            label = "Delete"
+        ){
+            openDialog.value = true
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowAlertDialog(
+    message: String,
+    openDialog: MutableState<Boolean>,
+    onYesPressed: ()-> Unit
+) {
+    if(openDialog.value){
+        BasicAlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            modifier = Modifier,
+            content = {
+                Surface(
+                    modifier = Modifier.padding(4.dp),
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color.White
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .padding(top = 8.dp)
+                    ) {
+                        Text(
+                            "Delete Book",
+                            modifier = Modifier.padding(10.dp),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            message,
+                            modifier = Modifier.padding(10.dp),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.DarkGray
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    onYesPressed()
+                                }
+                            ) {
+                                Text("Yes")
+                            }
+                            TextButton(
+                                onClick = {
+                                    openDialog.value = false
+                                }
+                            ) {
+                                Text("No")
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
+
 }
 
 @Composable
 fun SimpleForm(
-    modifier: Modifier = Modifier,
-    loading: Boolean = false,
     defaultValue: String = "Great Book!",
     onSearch: (String) -> Unit
 ){
@@ -248,7 +393,7 @@ fun SimpleForm(
             enabled = true,
             onAction = KeyboardActions{
                 if(!valid) return@KeyboardActions
-                onSearch(textFieldValue.value)
+                onSearch(textFieldValue.value.trim())
                 keyboardController?.hide()
             }
         )
@@ -276,8 +421,7 @@ fun ShowBookUpdate(
                 CardListItem(
                     book = bookInfo.data!!.first { mBook ->
                         mBook.googleBookId == bookItemId
-                    },
-                    onPressDetails = {}
+                    }
                 )
 
             }
@@ -286,7 +430,7 @@ fun ShowBookUpdate(
 }
 
 @Composable
-fun CardListItem(book: MBook, onPressDetails: () -> Unit) {
+fun CardListItem(book: MBook) {
     Row(
         modifier = Modifier
             .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 8.dp)
@@ -344,6 +488,9 @@ fun CardListItem(book: MBook, onPressDetails: () -> Unit) {
     }
 }
 
+fun showToast(context: Context, msg: String){
+    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+}
 
 
 

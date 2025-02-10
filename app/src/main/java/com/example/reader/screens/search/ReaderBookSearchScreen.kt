@@ -21,7 +21,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -93,7 +92,6 @@ fun SearchScreen(
 @Composable
 fun SearchForm(
     modifier: Modifier = Modifier,
-    loading: Boolean = false,
     hint: String = "Search",
     onSearch: (String)-> Unit = {}
 ){
@@ -231,6 +229,7 @@ fun BookRow(book: Item, navController: NavHostController) {
                     book.volumeInfo.title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     "Author: ${book.volumeInfo.authors}",

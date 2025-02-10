@@ -42,7 +42,6 @@ import com.example.reader.model.Item
 import com.example.reader.model.MBook
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
 
 @Composable
 fun BookDetailsScreen(
@@ -113,7 +112,9 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavHostController) 
         ) {
             var url = ""
             try {
-                url = bookData!!.imageLinks.smallThumbnail
+                if (bookData != null) {
+                    url = bookData.imageLinks.smallThumbnail
+                }
             }catch (e: Exception){
                 Log.d("ImageError", "BookRow: Book image not found")
             }
@@ -128,35 +129,35 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavHostController) 
             )
         }
         Text(
-            bookData!!.title,
-            style = MaterialTheme.typography.displaySmall,
+            bookData?.title.toString(),
+            style = MaterialTheme.typography.headlineLarge,
             maxLines = 19,
             overflow = TextOverflow.Ellipsis
         )
 
         Text(
-            text = "Authors: ${bookData.authors}",
+            text = "Authors: ${bookData?.authors.toString()}",
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "Page Count: ${bookData.pageCount}",
+            text = "Page Count: ${bookData?.pageCount.toString()}",
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "Categories: ${bookData.categories}",
+            text = "Categories: ${bookData?.categories.toString()}",
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "Published: ${bookData.publishedDate}",
+            text = "Published: ${bookData?.publishedDate.toString()}",
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(5.dp))
-        val cleanDescription = HtmlCompat.fromHtml(bookData.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+        val cleanDescription = HtmlCompat.fromHtml(bookData?.description.toString(), HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
 
         val localDims = LocalContext.current.resources.displayMetrics
         Surface(
             modifier = Modifier
-                .height(localDims.heightPixels.dp.times(0.09f))
+                .height(localDims.heightPixels.dp.times(0.15f))
                 .padding(4.dp),
             shape = RectangleShape,
             border = BorderStroke(1.dp, Color.DarkGray)
@@ -179,37 +180,51 @@ fun ShowBookDetails(bookInfo: Resource<Item>, navController: NavHostController) 
         ) {
             var title = ""
             try {
-                title = bookData.title
+                if (bookData != null) {
+                    title = bookData.title
+                }
             }catch (_:Exception){}
 
             var authors = ""
             try {
-                authors = bookData.authors.toString()
+                if (bookData != null) {
+                    authors = bookData.authors.toString()
+                }
             }catch (_:Exception){}
 
             var description = ""
             try {
-                description = bookData.description
+                if (bookData != null) {
+                    description = bookData.description
+                }
             }catch (_:Exception){}
 
             var categories = ""
             try {
-                categories = bookData.categories.toString()
+                if (bookData != null) {
+                    categories = bookData.categories.toString()
+                }
             }catch (_:Exception){}
 
             var photoUrl = ""
             try {
-                photoUrl = bookData.imageLinks.smallThumbnail
+                if (bookData != null) {
+                    photoUrl = bookData.imageLinks.smallThumbnail
+                }
             }catch (_:Exception){}
 
             var publishedDate = ""
             try {
-                publishedDate = bookData.publishedDate
+                if (bookData != null) {
+                    publishedDate = bookData.publishedDate
+                }
             }catch (_:Exception){}
 
             var pageCount = ""
             try {
-                pageCount = bookData.pageCount.toString()
+                if (bookData != null) {
+                    pageCount = bookData.pageCount.toString()
+                }
             }catch (_:Exception){}
 
             RoundedButton(

@@ -24,9 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.reader.components.ReaderLogo
 import com.example.reader.navigation.ReaderScreens
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
 
 @Composable
