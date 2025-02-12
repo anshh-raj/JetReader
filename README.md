@@ -12,11 +12,13 @@ Key features of the app include:
    
    This app ensures that users can track their reading progress easily and stay motivated.
 
-3. **User Authentication**: The app integrates **Firebase Authentication**, allowing users to securely sign in using email/password. This ensures a personalized experience and gives users access to their own reading list.
+3. **Rating and Reviews**: Users can rate books and leave comments with their thoughts, helping to build a personal library of feedback. This feature allows users to track their feelings about books they've read.
 
-4. **Data Storage with Firestore**: All user-specific book data (including book status and progress) is stored in **Firebase Firestore**, providing real-time syncing across devices and ensuring that user data is always up-to-date and accessible. This seamless cloud integration means that users can switch devices without losing their data.
+4. **User Authentication**: The app integrates **Firebase Authentication**, allowing users to securely sign in using email/password. This ensures a personalized experience and gives users access to their own reading list.
 
-5. **MVVM Architecture & State Management**: The app follows the **MVVM (Model-View-ViewModel)** architectural pattern, providing a clear separation of concerns for better maintainability and scalability. **State management** is implemented to handle loading states, data errors, and UI updates efficiently, ensuring smooth performance even during network requests.
+5. **Data Storage with Firestore**: All user-specific book data (including book status and progress) is stored in **Firebase Firestore**, providing real-time syncing across devices and ensuring that user data is always up-to-date and accessible. This seamless cloud integration means that users can switch devices without losing their data.
+
+6. **MVVM Architecture & State Management**: The app follows the **MVVM (Model-View-ViewModel)** architectural pattern, providing a clear separation of concerns for better maintainability and scalability. **State management** is implemented to handle loading states, data errors, and UI updates efficiently, ensuring smooth performance even during network requests.
 
 By using **Jetpack Compose** for UI development and **Kotlin** for concise and powerful code, the app offers an efficient, user-friendly interface. The integration of **Firebase** for authentication and data storage ensures a secure and synchronized experience across platforms. The **MVVM** architecture and **state management** provide a robust and scalable structure for future updates and new features.
 
