@@ -392,7 +392,7 @@ fun SimpleForm(
             labelId = "Enter Your Thoughts",
             enabled = true,
             onAction = KeyboardActions{
-                if(!valid) return@KeyboardActions
+//                if(!valid) return@KeyboardActions
                 onSearch(textFieldValue.value.trim())
                 keyboardController?.hide()
             }

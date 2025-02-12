@@ -31,6 +31,7 @@ class HomeScreenViewModel @Inject constructor(private val fireRepository: FireRe
         viewModelScope.launch {
             data.value.loading = true
             data.value = fireRepository.getAllBooksFromDatabase()
+//            Log.d("FFFF", "getAllBooks: ${data.value.data?.isEmpty()}")
             if(!data.value.data.isNullOrEmpty()) data.value.loading = false
         }
         Log.d("GET", "getAllBooks: ${data.value.data}")
